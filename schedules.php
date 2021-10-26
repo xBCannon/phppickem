@@ -63,26 +63,28 @@ $sql .= $where . " order by gameTimeEastern";
 $query = $mysqli->query($sql);
 if ($query->num_rows > 0) {
 	echo '<table cellpadding="4" cellspacing="0" class="table1">' . "\n";
-	echo '	<tr><th>Home</th><th>Visitor</th><th align="left">Game</th><th>Time / Result</th></tr>' . "\n";
+	echo '	<tr><th align="left">Game</th><th>Time / Result</th></tr>' . "\n";
 	$i = 0;
 	$prevWeek = 0;
 	while ($row = $query->fetch_assoc()) {
 		if ($prevWeek !== $row['weekNum'] && empty($team)) {
-			echo '	<tr class="subheader"><td colspan="4">Week ' . $row['weekNum'] . '</td></tr>' . "\n";
+			echo '	<tr class="subheader"><td colspan="4"><b>Week ' . $row['weekNum'] . '</b></td></tr>' . "\n";
 		}
 		$homeTeam = new team($row['homeID']);
 		$visitorTeam = new team($row['visitorID']);
 		$rowclass = (($i % 2 == 0) ? ' class="altrow"' : '');
 		echo '	<tr' . $rowclass . '>' . "\n";
-		echo '		<td><img src="images/logos/' . $homeTeam->teamID . '.svg" /></td>' . "\n";
-		echo '		<td><img src="images/logos/' . $visitorTeam->teamID . '.svg" /></td>' . "\n";
 		echo '		<td>' . $visitorTeam->teamName . ' @ ' . $homeTeam->teamName . '</td>' . "\n";
 		if (is_numeric($row['homeScore']) && is_numeric($row['visitorScore'])) {
 			//if score is entered, show result
-			echo '		<td></td>' . "\n";
-		} else {
+            if (intval($row['homeScore']) > intval($row['visitorScore'])) {
+                echo '		<td><img src="images/helmets_small/' . $visitorTeam->teamID . 'R.gif" /><span class="cls1"> ' . $visitorTeam->teamID . ' ' . $row['visitorScore'] . ' : </span><b><span class="cls2">' . $row['homeScore'] . ' ' . $homeTeam->teamID . ' </span></b><img src="images/helmets_small/' . $homeTeam->teamID . 'L.gif" />' . '</td>' . "\n";
+            } elseif (intval($row['visitorScore']) > intval($row['homeScore'])) {
+                echo '		<td><img src="images/helmets_small/' . $visitorTeam->teamID . 'R.gif" /><b><span class="cls2"> ' . $visitorTeam->teamID . ' ' . $row['visitorScore'] . '</span></b> : <span class="cls1">' . $row['homeScore'] . ' ' . $homeTeam->teamID . ' </span><img src="images/helmets_small/' . $homeTeam->teamID . 'L.gif" />' . '</td>' . "\n";
+            }
+        } else {
 			//show time
-			echo '		<td>' . date('D n/j g:i a', strtotime($row['gameTimeEastern'])) . ' ET</td>' . "\n";
+			echo '		<td><img src="images/helmets_small/' . $visitorTeam->teamID . 'R.gif" />' . date('D n/j g:i a', strtotime($row['gameTimeEastern'])) . ' ET <img src="images/helmets_small/' . $homeTeam->teamID . 'L.gif" /></td></td>' . "\n";
 		}
 		echo '	</tr>' . "\n";
 		$prevWeek = $row['weekNum'];

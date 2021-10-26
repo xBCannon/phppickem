@@ -26,7 +26,7 @@ while ($row = $query->fetch_assoc()) {
 	if ($row['division'] !== $division) {
 		echo '<h3>' . $row['division'] . '</h3>' . "\n";
 	}
-	//echo '<img src="images/helmets_small/' . $row['teamID'] . 'R.gif" /> ';
+	echo '<img src="images/helmets_small/' . $row['teamID'] . 'R.gif" /> ';
 	echo '<a href="schedules.php?team=' . $row['teamID'] . '">' . $row['city'] . ' ' . $row['team'] . '</a><br />' . "\n";
 	$conference = $row['conference'];
 	$division = $row['division'];

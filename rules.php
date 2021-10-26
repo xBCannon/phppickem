@@ -6,7 +6,7 @@ require_once('includes/header.php');
 
 <h2>Basics</h2>
 <p>The concept of NFL Pick 'Em is simple: pick the winners of each game each week.</p>
-<p>To enter, fill in the entry form by selecting the outcome of each game.</p>
+<p>To enter, fill in the <b>Entry Form</b> by selecting the outcome of each game.</p>
 <p>The player who accurately predicts the most correct winners each week gets a win.  If two players share the winning score for a week, the win is awarded to both players.</p>
 <p>At the end of the football season the person who has the most weekly wins, is the winner.  The final tie breaker is determined by who has the better overall pick ratio (correct picks / total picks).</p>
 
@@ -18,11 +18,7 @@ require_once('includes/header.php');
 <p>Entries must be completed on time. Once a game is locked, you may not change your pick for it. If you did not make a pick for a particular game, it is counted as a loss. If you submit a partial entry and either forget or are unable to complete it, the games you did not pick will count as losses.</p>
 <p>If you have trouble accessing the site, logging in or completing your entry, please contact the Administrator for help.  If you are unable to make your picks before they are locked out, the Administrator may enter your picks after the fact if the picks are communicated to the Administrator ahead of time.</p>
 
-<p>If you have any questions, please contact the <a href="mailto:<?php echo $adminUser->email; ?>">Administrator</a></p>
-
-<h2>2008 Rule Changes:</h2>
-<p>- No more weekly tiebreaker scores.  To make things even easier, all you need to do week to week is make picks.</p>
-<p>- No more "shared wins".  If 2 players are tied for the highest score, both players get a win.</p>
+<p>If you have any questions, please contact <a href="mailto:braydocan@live.com">Brayden</a>.</p>
 
 <!--
 Navigating the Site

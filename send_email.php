@@ -99,7 +99,7 @@ if ($_POST['action'] == 'Select' && isset($_POST['cannedMsg'])) {
 
 	//replace variables
 	$template_vars = array('{week}', '{first_game}', '{site_url}', '{rules_url}', '{winners}', '{previousWeek}', '{winningScore}', '{possibleScore}', '{currentLeaders}', '{bestPickRatios}');
-	$replacement_values = array($week, date('l F j, g:i a', strtotime($firstGameTime)), SITE_URL, SITE_URL . 'rules.php', $winners, $prevWeek, $weekStats[$prevWeek][highestScore], getGameTotal($prevWeek), $currentLeaders, $bestPickRatios);
+	$replacement_values = array($week, date('l F j, g:i a', strtotime($firstGameTime)), SITE_URL, SITE_URL . 'rules.php', $winners, $prevWeek, $weekStats[$prevWeek]['highestScore'], getGameTotal($prevWeek), $currentLeaders, $bestPickRatios);
 	$subject = stripslashes(str_replace($template_vars, $replacement_values, $subjectTemplate));
 	$message = stripslashes(str_replace($template_vars, $replacement_values, $messageTemplate));
 }
@@ -113,12 +113,17 @@ if ($_POST['action'] == 'Send Message') {
 		$sql .= "(select count(p.pickID) from nflp_picks p inner join nflp_schedule s on p.gameID = s.gameID where userID = u.userID and s.weekNum = " . $week . ") as userPicks ";
 		$sql .= "from " . DB_PREFIX . "users u ";
 		$sql .= "where u.`status` = 1 and u.userName <> 'admin' ";
-		$sql .= "group by u.firstname, u.email ";
+		// $sql .= "group by u.firstname, u.email ";
+		$sql .= "group by u.userID, u.firstname, u.email ";
 		$sql .= "having userPicks < " . $totalGames;
 	} else {
 		//select all users
-		$sql = "select firstname, email from " . DB_PREFIX . "users where `status` = 1 and userName <> 'admin'";
+		if (ENABLE_MAILING_LIST)
+			$sql = "select 'everyone' as firstname, '" . MAILING_LIST . "' as email";
+		else
+			$sql = "select firstname, email from " . DB_PREFIX . "users where `status` = 1 and userName <> 'admin'";
 	}
+	// echo $sql . "\n\n";
 	$query = $mysqli->query($sql);
 	if ($query->num_rows > 0) {
 		while ($row = $query->fetch_assoc()) {
@@ -128,22 +133,47 @@ if ($_POST['action'] == 'Send Message') {
 			$message = str_replace('{player}', $row['firstname'], $message);
 
 			$mail = new PHPMailer();
+            $mail->isSMTP(true);
+            $mail->Host = 'smtppro.zoho.com';
+            $mail->Port = '465';
+            $mail->Username='brayden@wumbo.rocks';
+            $mail->Password='p6Hyp^B24C4$s';
+            $mail->SMTPSecure = 'ssl';
 			$mail->IsHTML(true);
 
-			$mail->From = $adminUser->email; // the email field of the form
-			$mail->FromName = 'NFL Pick \'Em Admin'; // the name field of the form
+			$mail->From = 'brayden@wumbo.rocks'; // the email field of the form
+            $mail->FromName = 'Brayden Cannon'; // the name field of the form
 
 			$addresses .= ((strlen($addresses) > 0) ? ', ' : '') . $row['email'];
 			$mail->AddAddress($row['email']); // the form will be sent to this address
-			$mail->Subject = $subject; // the subject of email
+            $mail->Subject = $subject; // the subject of email
 
 			// html text block
 			$mail->Body = $message;
 			$mail->Send();
-			//echo $subject . '<br />';
-			//echo $message;
+			echo $subject . '<br />';
+			echo $message;
+
+			$headers  = 'MIME-Version: 1.0' . "\r\n";
+			$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
+
+			// Additional headers
+			$to = $row['email'];
+			$headers .= 'To: ' . $row['email'] . "\r\n";
+			$headers .= 'From: ' . SITE_NAME . ' <brayden@wumbo.rocks>' . "\r\n";
+
+			// Mail it
+			$result = mail($to, $subject, $message, $headers);
 		}
-		$display = '<div class="responseOk">Message successfully sent to: ' . $addresses . '.</div><br/>';
+		if ($result)
+			$display = '<div class="responseOk">Message successfully sent to: ' . $addresses . '.</div><br/>';
+		else
+			$display = '<div class="responseOk">Failed to send message to: ' . $addresses . '.</div><br/>';
+
+		$display .= '<p>to      = ' . $to . '</p>';
+		$display .= '<p>subject = ' . $subject . '</p>';
+		$display .= '<p>message = ' . $message . '</p>';
+		$display .= '<p>headers = ' . $headers . '</p>';
 		//header('Location: send_email.php');
 		//exit;
 	}

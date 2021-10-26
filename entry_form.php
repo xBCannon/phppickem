@@ -2,7 +2,9 @@
 require_once('includes/application_top.php');
 require('includes/classes/team.php');
 
-if ($_POST['action'] == 'Submit') {
+$activeTab = 'entry_form';
+
+if ($_POST['action'] == 'Submit Your Picks') {
 	$week = $_POST['week'];
 	$cutoffDateTime = getCutoffDateTime($week);
 
@@ -89,6 +91,42 @@ include('includes/header.php');
 		$('label').click(function(){
 		  checkRadios();
 		});
+		
+		$('.injury_report').click(function(){
+			var game_id = $(this).attr('id');
+			$(this).hide();
+			$('#injurt_report_'+game_id).show();
+		});
+		
+		$('.show_all_injury').click(function(){
+			$(this).hide();
+			$('.injury_report').hide();
+			$('.injury_report_row').show();
+		});
+		
+		window.addEventListener( 'keypress', (function() {
+			var strToType = 'ryan',
+				strTyped = '';
+			return function( event ) {
+				var character = String.fromCharCode(event.which);
+				strTyped += character;
+				if (strToType.indexOf(strTyped) === -1) strTyped = '';
+				else if (strTyped === strToType) {
+					strTyped = '';
+					if (!($("textarea").is(":focus"))) {
+						$("div.bg-row2").each(function () {
+							var radios = $(this).find("input[type=radio]");
+							if (radios.length > 0) {
+								var randomnumber = Math.floor(Math.random() * radios.length);
+								radios[randomnumber].checked = true;
+							}
+						});
+						checkRadios();
+						alert('RYAN PICK MODE ACTIVATED! Your pick choices have been randomized by typing ryan on this page. Click submit to save or go to another page to cancel.');
+					}
+				}
+			};
+		}()) );
 	});
 	</script>
 <?php
@@ -101,10 +139,20 @@ $i = 0;
 if ($query->num_rows > 0) {
 	while ($row = $query->fetch_assoc()) {
 		if ($i > 0) $weekNav .= ' | ';
+		if ((int)$row['weekNum'] == 19)
+			$weekName = "Wild Card";
+		else if ((int)$row['weekNum'] == 20)
+			$weekName = "Divisional";
+		else if ((int)$row['weekNum'] == 21)
+			$weekName = "Conference";
+		else if ((int)$row['weekNum'] == 22)
+			$weekName = "Super Bowl";
+		else
+			$weekName = $row['weekNum'];
 		if ($week !== (int)$row['weekNum']) {
-			$weekNav .= '<a href="entry_form.php?week=' . $row['weekNum'] . '">' . $row['weekNum'] . '</a>';
+			$weekNav .= '<a href="entry_form.php?week=' . $row['weekNum'] . '">' . $weekName . '</a>';
 		} else {
-			$weekNav .= $row['weekNum'];
+			$weekNav .= $weekName;
 		}
 		$i++;
 	}
@@ -115,14 +163,18 @@ $weekNav .= '</div>' . "\n";
 echo $weekNav;
 ?>
 		<div class="row">
-			<div class="col-md-4 col-xs-12 col-right">
+			<div class="col-md-4 col-xs-12 col-right hide-mobile">
 <?php
 include('includes/column_right.php');
 ?>
 			</div>
 			<div id="content" class="col-md-8 col-xs-12">
-				<h2>Week <?php echo $week; ?> - Make Your Picks:</h2>
-				<p>Please make your picks below for each game.</p>
+				<h2>Week <?php echo $week; ?> - Make Your Picks</h2>
+				<hr style="border-top:3px solid #f1f3f5" />
+				<p style="margin-bottom:20px">Please make your picks below for each game.<?php if ($week == $currentWeek) { ?><br/><a class="show_all_injury" href="javascript:void(0);">Show all injury reports</a><?php } ?></p>
+				<div style="background:#8f8f8f;color:#fff;float:left;width:50%;text-align:center;padding:2px 0 2px;">Away</div>
+				<div style="background:#8f8f8f;color:#fff;float:right;width:50%;text-align:center;padding:2px 0 2px;">Home</div>
+				<div style="clear:both"></div>
 	<?php
 	//get existing picks
 	$picks = getUserPicks($week, $user->userID);
@@ -148,6 +200,15 @@ include('includes/column_right.php');
 	//echo $sql;
 	$query = $mysqli->query($sql) or die($mysqli->error);
 	if ($query->num_rows > 0) {
+		if ($week == $currentWeek) {
+			$url = "https://www.rotowire.com/football/tables/injury-report.php?team=ALL&pos=ALL";
+			if ($xmlData = file_get_contents($url, 0, stream_context_create(["http"=>["timeout"=>3]]))) {
+				$injuries = json_decode($xmlData, true);
+			}
+			foreach($injuries as $key => $value){
+			   $injuries_by_team[$value['team']][$key] = $value;
+			}
+		}
 		echo '<form name="entryForm" action="entry_form.php" method="post" onsubmit="return checkform();">' . "\n";
 		echo '<input type="hidden" name="week" value="' . $week . '" />' . "\n";
 		//echo '<table cellpadding="4" cellspacing="0" class="table1">' . "\n";
@@ -228,27 +289,82 @@ include('includes/column_right.php');
 			}
 			echo '						</div>' . "\n";
 			echo '					</div>'."\n";
+			if (!$row['expired'] AND $week == $currentWeek) {
+				echo '					<div class="row bg-row4 center">'."\n";
+				echo '						<a href="javascript:void(0);" id="'.$row['gameID'].'" class="injury_report">Show Injury Report</a>'."\n";
+				echo '					</div>'."\n";
+				echo '					<div class="row bg-row4 injury_report_row" id="injurt_report_'.$row['gameID'].'" style="display:none;padding-top:10px;padding-bottom:10px;border-left:1px solid #e8e8e8;border-right:1px solid #e8e8e8;border-bottom:1px solid #e8e8e8">'."\n";
+				echo '<span style="display:block;padding-left:15px;font-size:16px;font-weight:bold;font-style:italic;margin-bottom:5px"><img style="width:24px;height:24px" src="images/logos/'.$visitorTeam->teamID.'.svg"> '.$visitorTeam->city . ' ' . $visitorTeam->team.'</span>';
+				$i = 1;
+				foreach ($injuries_by_team[$visitorTeam->teamID] as $injury)
+				{
+					if ($injury['status'] == "Questionable" OR $injury['status'] == "Out" OR $injury['status'] == "Doubtful")
+					{
+						if ($i%2 == 0)
+							$bgrow = "#f9f9f9";
+						else
+							$bgrow = "#fff";
+						if ($injury['status'] == "Questionable")
+							$status_dot_color = "#ffce07";
+						if ($injury['status'] == "Out")
+							$status_dot_color = "#c00";
+						if ($injury['status'] == "Doubtful")
+							$status_dot_color = "#ff8900";
+						echo '						<div class="row" style="margin-bottom:2px;background:'.$bgrow.'">';
+						echo '<div class="injury_item" style="font-size:14px"><div class="col-xs-6" style="white-space: nowrap;overflow:hidden">'.$injury["firstname"].' '.$injury["lastname"].'</div><div class="col-xs-2">'.$injury["position"].'</div><div class="col-xs-4" style="white-space: nowrap;overflow:hidden;text-overflow: ellipsis;"><i style="font-size:9px;color:'.$status_dot_color.'" class="fas fa-circle"></i> '.$injury['status'].'</div></div>'."\n";
+						echo '						</div>'."\n";
+						$i++;
+					}
+				}
+				echo '<span style="display:block;padding-left:15px;font-size:16px;font-weight:bold;font-style:italic;margin-top:15px;margin-bottom:5px"><img style="width:24px;height:24px" src="images/logos/'.$homeTeam->teamID.'.svg"> '.$homeTeam->city . ' ' . $homeTeam->team.'</span>';
+				$i = 1;
+				foreach ($injuries_by_team[$homeTeam->teamID] as $injury)
+				{
+					if ($injury['status'] == "Questionable" OR $injury['status'] == "Out" OR $injury['status'] == "Doubtful")
+					{
+						if ($i%2 == 0)
+							$bgrow = "#f9f9f9";
+						else
+							$bgrow = "#fff";
+						if ($injury['status'] == "Questionable")
+							$status_dot_color = "#ffce07";
+						if ($injury['status'] == "Out")
+							$status_dot_color = "#c00";
+						if ($injury['status'] == "Doubtful")
+							$status_dot_color = "#ff8900";
+						echo '						<div class="row" style="margin-bottom:2px;background:'.$bgrow.'">';
+						echo '<div class="injury_item" style="font-size:14px"><div class="col-xs-6" style="white-space: nowrap;overflow:hidden">'.$injury["firstname"].' '.$injury["lastname"].'</div><div class="col-xs-2">'.$injury["position"].'</div><div class="col-xs-4" style="white-space: nowrap;overflow:hidden;text-overflow: ellipsis;"><i style="font-size:9px;color:'.$status_dot_color.'" class="fas fa-circle"></i> '.$injury['status'].'</div></div>'."\n";
+						echo '						</div>'."\n";
+						$i++;
+					}
+				}
+				echo '					</div>'."\n";
+			}
 			if ($row['expired']) {
 				//else show locked pick
 				echo '					<div class="row bg-row4">'."\n";
 				$pickID = getPickID($row['gameID'], $user->userID);
 				if (!empty($pickID)) {
 					$statusImg = '';
+					$statusBG = '';
 					$pickTeam = new team($pickID);
 					$pickLabel = $pickTeam->teamName;
 				} else {
+					$statusBG = '#aa5454';
 					$statusImg = '<img src="images/cross_16x16.png" width="16" height="16" alt="" />';
 					$pickLabel = 'None Selected';
 				}
 				if ($scoreEntered) {
 					//set status of pick (correct, incorrect)
 					if ($pickID == $winnerID) {
-						$statusImg = '<img src="images/check_16x16.png" width="16" height="16" alt="" />';
+						$statusBG = '#7fbfa7';
+						$statusImg = '<i class="fad fa-check-square"></i>';
 					} else {
-						$statusImg = '<img src="images/cross_16x16.png" width="16" height="16" alt="" />';
+						$statusBG = '#bf7272';
+						$statusImg = '<i class="fad fa-times-square"></i>';
 					}
 				}
-				echo '						<div class="col-xs-12 center your-pick"><b>Your Pick:</b></br />';
+				echo '						<div style="background-color:' . $statusBG . '" class="col-xs-12 center your-pick"><b>Your Pick:</b></br />';
 				echo $statusImg . ' ' . $pickLabel;
 				echo '</div>' . "\n";
 				echo '					</div>' . "\n";
@@ -258,8 +374,12 @@ include('includes/column_right.php');
 		}
 		echo '		</div>' . "\n";
 		echo '		</div>' . "\n";
-		echo '<p class="noprint"><input type="checkbox" name="showPicks" id="showPicks" value="1"' . (($showPicks) ? ' checked="checked"' : '') . ' /> <label for="showPicks">Allow others to see my picks</label></p>' . "\n";
-		echo '<p class="noprint"><input type="submit" name="action" value="Submit" /></p>' . "\n";
+        if (ALWAYS_HIDE_PICKS) {
+            echo '<p class="noprint"><input type="hidden" name="showPicks" id="showPicks" value="0"' . (($showPicks) ? ' checked="checked"' : '') . ' /> <label for="showPicks">' . "\n";
+        } else {
+            echo '<p class="noprint"><input type="checkbox" name="showPicks" id="showPicks" value="1"' . (($showPicks) ? ' checked="checked"' : '') . ' /> <label for="showPicks">Allow others to see my picks</label></p>' . "\n";
+        }
+		echo '<p class="noprint"><input type="submit" name="action" value="Submit Your Picks" /></p>' . "\n";
 		echo '</form>' . "\n";
 	}
 
@@ -267,7 +387,7 @@ echo '	</div>'."\n"; // end col
 echo '	</div>'."\n"; // end entry-form row
 
 //echo '<div id="comments" class="row">';
-include('includes/comments.php');
+//include('includes/comments.php');
 //echo '</div>';
 
 include('includes/footer.php');

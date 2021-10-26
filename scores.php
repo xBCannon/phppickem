@@ -12,12 +12,13 @@ if ($_POST['action'] == 'Update') {
 		$homeScore = ((strlen($game['homeScore']) > 0) ? $game['homeScore'] : 'NULL');
 		$visitorScore = ((strlen($game['visitorScore']) > 0) ? $game['visitorScore'] : 'NULL');
 		$overtime = ((!empty($game['OT'])) ? '1' : '0');
+		$final = ((!empty($game['final'])) ? '1' : '0');
 		$sql = "update " . DB_PREFIX . "schedule ";
-		$sql .= "set homeScore = " . $homeScore . ", visitorScore = " . $visitorScore . ", overtime = " . $overtime . " ";
+		$sql .= "set homeScore = " . $homeScore . ", visitorScore = " . $visitorScore . ", overtime = " . $overtime . ", final = " . $final . " ";
 		$sql .= "where gameID = " . $game['gameID'];
 		$mysqli->query($sql) or die('Error updating score: ' . $mysqli->error);
 	}
-	header('Location: ./');
+	header('Location: ./results.php');
 	exit;
 }
 
@@ -50,26 +51,26 @@ $weekNav .= '</div>' . "\n";
 echo $weekNav;
 ?>
 <script type="text/javascript">
-function getScores(weekNum) {
-	$.get("getHtmlScores.php", {week: weekNum}, function(data) {
-		for(var item in data) {
-			visitorScoreField = document.getElementById('game[' + data[item].gameID + '][visitorScore]');
-			homeScoreField = document.getElementById('game[' + data[item].gameID + '][homeScore]');
-			OTField = document.getElementById('game[' + data[item].gameID + '][OT]');
-			if (visitorScoreField.value !== data[item].visitorScore) {
-				visitorScoreField.value = data[item].visitorScore;
-				visitorScoreField.className="fieldLoaded";
-			}
-			if (homeScoreField.value !== data[item].homeScore) {
-				homeScoreField.value = data[item].homeScore;
-				homeScoreField.className="fieldLoaded";
-			}
-			if (data[item].overtime == '1') {
-				OTField.checked = true;
-			}
-		}
-	},'json');
-}
+    function getScores(weekNum) {
+        $.get("getHtmlScores.php", {week: weekNum}, function (data) {
+            for (var item in data) {
+                visitorScoreField = document.getElementById('game[' + data[item].gameID + '][visitorScore]');
+                homeScoreField = document.getElementById('game[' + data[item].gameID + '][homeScore]');
+                OTField = document.getElementById('game[' + data[item].gameID + '][overtime]');
+                if (visitorScoreField.value !== data[item].visitorScore) {
+                    visitorScoreField.value = data[item].visitorScore;
+                    visitorScoreField.className = "fieldLoaded";
+                }
+                if (homeScoreField.value !== data[item].homeScore) {
+                    homeScoreField.value = data[item].homeScore;
+                    homeScoreField.className = "fieldLoaded";
+                }
+                if (data[item].overtime == '1') {
+                    OTField.checked = true;
+                }
+            }
+        }, 'json');
+    }
 </script>
 <p><input type="button" value="Load Scores" onclick="return getScores(<?php echo $week; ?>);" class="btn btn-info" /></p>
 <form id="scoresForm" name="scoresForm" action="scores.php" method="post">
@@ -98,6 +99,7 @@ if ($query->num_rows > 0) {
 		echo '			<td align="right"><input type="hidden" name="gameID[' . strtolower($homeTeam->team) . ']" value="' . $row['gameID'] . '" />at ' . $homeTeam->teamName . '</td>' . "\n";
 		echo '			<td><input type="text" name="game[' . $row['gameID'] . '][homeScore]" id="game[' . $row['gameID'] . '][homeScore]" value="' . $row['homeScore'] . '" size="3" /></td>' . "\n";
 		echo '			<td>OT <input type="checkbox" name="game[' . $row['gameID'] . '][OT]" id="game[' . $row['gameID'] . '][OT]" value="1"' . (($row['overtime']) ? ' checked="checked"' : '') . '" /></td>' . "\n";
+		echo '			<td>Final <input type="checkbox" name="game[' . $row['gameID'] . '][final]" id="game[' . $row['gameID'] . '][final]" value="1"' . (($row['final']) ? ' checked="checked"' : '') . '" /></td>' . "\n";
 		echo '		</tr>' . "\n";
 		$i++;
 	}
