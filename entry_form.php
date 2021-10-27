@@ -228,19 +228,23 @@ include('includes/column_right.php');
 			if (!empty($homeScore) || !empty($visitorScore)) {
                 //if score is entered, show score
                 $scoreEntered = true;
-                if ($homeScore > $visitorScore) {
-                    $winnerID = $row['homeID'];
-                } else if ($visitorScore > $homeScore) {
-                    $winnerID = $row['visitorID'];
-                };
                 //$winnerID will be null if tie, which is ok
                 if ($row['final'] = 1) {
+                    //check if the game is final
+                    if ($homeScore > $visitorScore) {
+                        $winnerID = $row['homeID'];
+                    } else if ($visitorScore > $homeScore) {
+                        $winnerID = $row['visitorID'];
+                    };
                     echo '					<div class="col-xs-12 center"><b>Final: ' . $row['visitorScore'] . ' - ' . $row['homeScore'] . '</b></div>' . "\n";
-                } else {
-                    //else show time of game
-                    echo '					<div class="col-xs-12 center">' . date('D n/j g:i a', strtotime($row['gameTimeEastern'])) . ' ET</div>' . "\n";
+                } elseif ($row['final'] != 1) {
+                    echo '					<div class="col-xs-12 center"><b>' . $row['visitorScore'] . ' - ' . $row['homeScore'] . '</b></div>' . "\n";
                 }
-            }
+            } else {
+                //else show time of game
+                echo '					<div class="col-xs-12 center">' . date('D n/j g:i a', strtotime($row['gameTimeEastern'])) . ' ET</div>' . "\n";
+                }
+
 			echo '					</div>'."\n";
 			echo '					<div class="row versus">' . "\n";
 			echo '						<div class="col-xs-1"></div>' . "\n";
