@@ -3,6 +3,8 @@
 
 *Sept. 2020 - I made this fork to reflect some of the updates I had made (and taken from DonThorntonJr's fork) since the original maintenance had stopped and to bring it current to PHP 7.2 compatibility
 
+*Oct. 2021 - I started my PHP coding journey by getting this up and running for some friends of mine this year. I've decided to get share it on GitHub and also try to learn a thing or two on here along the way. I haven't been logging my updates, so a bunch of these are just bulk uploaded without comments. I'll do better tracking them from here on out :D
+
 ---
 
 # PHP Pick 'Em
