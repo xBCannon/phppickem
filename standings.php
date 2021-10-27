@@ -18,12 +18,15 @@ if (isset($weekStats)) {
 	$i = 0;
 	foreach($weekStats as $week => $stats) {
 		$winners = '';
+
+        // Week 1 is not included in my 2021 Pick'Em, therefore thiswas added to notify players.
         if ($week <= 1){
             $winners = '<span style="color:#ff0000;">Week is <u>NOT</u> included in this years Pick Em challenge</span>';
             $stats[highestScore] = '<span style="color:#ff0000;">*0</span>';
             $stats[possibleScore] = '<span style="color:#ff0000;">0 (16)</span>';
             $week = '<span style="color:#ff0000;">*1</span>';
         }
+
 		if (is_array($stats[winners])) {
 			foreach($stats[winners] as $winner => $winnerID) {
 				$tmpUser = $login->get_user_by_id($winnerID);
