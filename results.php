@@ -269,7 +269,7 @@ if (sizeof($playerTotals) > 0) {
 					break;
 			}
 		}
-		echo '	<tr><th colspan="' . (sizeof($games) + 2) . '" align="left">Winner(s): <span class="cls2">' . $winnersHtml . '</span></th>rcmd</tr>' . "\n";
+		echo '	<tr><th colspan="' . (sizeof($games) + 2) . '" align="left">Winner(s): <span class="cls2">' . $winnersHtml . '</span></th></tr>' . "\n";
 	}
 ?>
 	</tbody>
