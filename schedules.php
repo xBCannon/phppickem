@@ -76,16 +76,24 @@ if ($query->num_rows > 0) {
 		echo '	<tr' . $rowclass . '>' . "\n";
 		echo '		<td>' . $visitorTeam->teamName . ' @ ' . $homeTeam->teamName . '</td>' . "\n";
 		if (is_numeric($row['homeScore']) && is_numeric($row['visitorScore'])) {
-			//if score is entered, show result
-            if (intval($row['homeScore']) > intval($row['visitorScore'])) {
-                echo '		<td><img src="images/helmets_small/' . $visitorTeam->teamID . 'R.gif" /><span class="cls1"> ' . $visitorTeam->teamID . ' ' . $row['visitorScore'] . ' : </span><b><span class="cls2">' . $row['homeScore'] . ' ' . $homeTeam->teamID . ' </span></b><img src="images/helmets_small/' . $homeTeam->teamID . 'L.gif" />' . '</td>' . "\n";
-            } elseif (intval($row['visitorScore']) > intval($row['homeScore'])) {
-                echo '		<td><img src="images/helmets_small/' . $visitorTeam->teamID . 'R.gif" /><b><span class="cls2"> ' . $visitorTeam->teamID . ' ' . $row['visitorScore'] . '</span></b> : <span class="cls1">' . $row['homeScore'] . ' ' . $homeTeam->teamID . ' </span><img src="images/helmets_small/' . $homeTeam->teamID . 'L.gif" />' . '</td>' . "\n";
+            //if score is entered, show result
+            if ($row['final'] != 0) {
+                if (intval($row['homeScore']) > intval($row['visitorScore'])) {
+                    echo '		<td><img src="images/helmets_small/' . $visitorTeam->teamID . 'R.gif" /><span class="cls1"> ' . $visitorTeam->teamID . ' ' . $row['visitorScore'] . ' : </span><b><span class="cls2">' . $row['homeScore'] . ' ' . $homeTeam->teamID . ' </span></b><img src="images/helmets_small/' . $homeTeam->teamID . 'L.gif" />' . '</td>' . "\n";
+                } elseif (intval($row['visitorScore']) > intval($row['homeScore'])) {
+                    echo '		<td><img src="images/helmets_small/' . $visitorTeam->teamID . 'R.gif" /><b><span class="cls2"> ' . $visitorTeam->teamID . ' ' . $row['visitorScore'] . '</span></b> : <span class="cls1">' . $row['homeScore'] . ' ' . $homeTeam->teamID . ' </span><img src="images/helmets_small/' . $homeTeam->teamID . 'L.gif" />' . '</td>' . "\n";
+                }
+            } elseif ($row['final'] = 1) {
+                if (intval($row['homeScore']) > intval($row['visitorScore'])) {
+                    echo '		<td><b><span class="cls1">LIVE: </span></b><img src="images/helmets_small/' . $visitorTeam->teamID . 'R.gif" /> ' . $visitorTeam->teamID . ' ' . $row['visitorScore'] . ' : <b>' . $row['homeScore'] . ' ' . $homeTeam->teamID . '</b> <img src="images/helmets_small/' . $homeTeam->teamID . 'L.gif" />' . '</td>' . "\n";
+                } elseif (intval($row['visitorScore']) > intval($row['homeScore'])) {
+                    echo '		<td><b><span class="cls1">LIVE: </span></b><img src="images/helmets_small/' . $visitorTeam->teamID . 'R.gif" /><b> ' . $visitorTeam->teamID . ' ' . $row['visitorScore'] . '</b> : ' . $row['homeScore'] . ' ' . $homeTeam->teamID . ' <img src="images/helmets_small/' . $homeTeam->teamID . 'L.gif" />' . '</td>' . "\n";
+                }
             }
         } else {
-			//show time
-			echo '		<td><img src="images/helmets_small/' . $visitorTeam->teamID . 'R.gif" />' . date('D n/j g:i a', strtotime($row['gameTimeEastern'])) . ' ET <img src="images/helmets_small/' . $homeTeam->teamID . 'L.gif" /></td></td>' . "\n";
-		}
+            //show time
+            echo '		<td><img src="images/helmets_small/' . $visitorTeam->teamID . 'R.gif" />' . date('D n/j g:i a', strtotime($row['gameTimeEastern'])) . ' ET <img src="images/helmets_small/' . $homeTeam->teamID . 'L.gif" /></td></td>' . "\n";
+        }
 		echo '	</tr>' . "\n";
 		$prevWeek = $row['weekNum'];
 		$i++;
