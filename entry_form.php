@@ -197,7 +197,7 @@ include('includes/column_right.php');
 	$sql .= "inner join " . DB_PREFIX . "teams vt on s.visitorID = vt.teamID ";
 	$sql .= "where s.weekNum = " . $week . " ";
 	$sql .= "order by s.gameTimeEastern, s.gameID";
-	//echo $sql;
+	echo $sql;
 	$query = $mysqli->query($sql) or die($mysqli->error);
 	if ($query->num_rows > 0) {
 		if ($week == $currentWeek) {
@@ -222,6 +222,7 @@ include('includes/column_right.php');
 			$visitorTeam = new team($row['visitorID']);
 			$homeScore = (int)$row['homeScore'];
 			$visitorScore = (int)$row['visitorScore'];
+            $final = (int)$row['final'];
 			$rowclass = (($i % 2 == 0) ? ' class="altrow"' : '');
 			echo '				<div class="matchup">' . "\n";
 			echo '					<div class="row bg-row1">'."\n";
@@ -229,7 +230,7 @@ include('includes/column_right.php');
                 //if score is entered, show score
                 $scoreEntered = true;
                 //$winnerID will be null if tie, which is ok
-                if ($row['final'] = 1) {
+                if ($final = 1) {
                     //check if the game is final
                     if ($homeScore > $visitorScore) {
                         $winnerID = $row['homeID'];
