@@ -197,7 +197,7 @@ include('includes/column_right.php');
 	$sql .= "inner join " . DB_PREFIX . "teams vt on s.visitorID = vt.teamID ";
 	$sql .= "where s.weekNum = " . $week . " ";
 	$sql .= "order by s.gameTimeEastern, s.gameID";
-	echo $sql;
+	//echo $sql;
 	$query = $mysqli->query($sql) or die($mysqli->error);
 	if ($query->num_rows > 0) {
 		if ($week == $currentWeek) {
@@ -230,7 +230,7 @@ include('includes/column_right.php');
                 //if score is entered, show score
                 $scoreEntered = true;
                 //$winnerID will be null if tie, which is ok
-                if ($final = 1) {
+                if ($final != 0) {
                     //check if the game is final
                     if ($homeScore > $visitorScore) {
                         $winnerID = $row['homeID'];
@@ -238,8 +238,8 @@ include('includes/column_right.php');
                         $winnerID = $row['visitorID'];
                     };
                     echo '					<div class="col-xs-12 center"><b>Final: ' . $row['visitorScore'] . ' - ' . $row['homeScore'] . '</b></div>' . "\n";
-                } elseif ($row['final'] != 1) {
-                    echo '					<div class="col-xs-12 center"><b>' . $row['visitorScore'] . ' - ' . $row['homeScore'] . '</b></div>' . "\n";
+                } elseif ($final != 1) {
+                    echo '					<div class="col-xs-12 center"><b>LIVE: ' . $row['visitorScore'] . ' - ' . $row['homeScore'] . '</b></div>' . "\n";
                 }
             } else {
                 //else show time of game
@@ -363,7 +363,7 @@ include('includes/column_right.php');
 				}
 				if ($scoreEntered) {
 					//set status of pick (correct, incorrect)
-                    if ($row['final'] = 1) {
+                    if ($row['final'] != 0) {
                         if ($pickID == $winnerID) {
                             $statusBG = '#7fbfa7';
                             $statusImg = '<i class="fad fa-check-square"></i>';
@@ -371,8 +371,8 @@ include('includes/column_right.php');
                             $statusBG = '#bf7272';
                             $statusImg = '<i class="fad fa-times-square"></i>';
                         }
-                    } elseif ($row['final'] != 1) {
-                        $statusBG = '#c7d833';
+                    } elseif ($row['final'] = 1) {
+                        $statusBG = '#d0b230';
                         $statusImg = '<i class="fad fa-times-square"></i>';
                     }
 				}
