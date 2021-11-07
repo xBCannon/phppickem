@@ -43,8 +43,11 @@ if(empty($_SESSION['logged']) || $_SESSION['logged'] !== 'yes') {
 
 <body>
 	<div class="container">
-		<form class="form-signin" role="form" action="login.php" method="POST">
-			<h2 class="form-signin-heading">NFL Pick 'Em Login</h2>
+            <div class="login-center">
+                <h2 class="form-signin-heading">2021 NFL Pick 'Em</h2>
+                <img src="images/login.png" alt="Login">
+            </div>
+        <form class="form-signin" role="form" action="login.php" method="POST">
 			<?php
 			//print_r($_POST);
 			if ($_GET['login'] == 'failed') {
